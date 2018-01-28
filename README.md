@@ -15,6 +15,4 @@ Source:  http://gss.norc.org/About-The-GSS
 Source:  http://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/34802/version/1
 
 
-### To view the full project on html click below link:
-## file:///C:/Users/DELL/Desktop/Online%20Courses/Statistics%20with%20R/Inferential%20Statistics/week5/ififth.html
 
