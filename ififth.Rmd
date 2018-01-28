@@ -1,0 +1,145 @@
+---
+title: "Statistical inference with the GSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+```
+
+### Load data
+
+
+
+```{r load-data}
+load("gss.Rdata")
+```
+
+The General Social Survey gathers data on contemporary American society in order to monitor and explain trends and constants in attitudes, behaviors, and attributes. Altogether the GSS is the single best source for sociological and attitudinal trend data covering the United States. It allows researchers to examine the structure and functioning of society in general as well as the role played by relevant subgroups and to compare the United States to other nations.
+
+The National Data Program for the Social Sciences has been conducted since 1972 by NORC at the University of Chicago, with the support of the National Science Foundation. This program has had two main goals:
+
+To conduct basic scientific research on the structure and development of American society.
+To distribute up-to-date, important, high-quality data to social scientists, students, policy makers, and others.
+This research is carried out by a data collection program designed to both monitor social change within the United States and to compare the United States to other nations. Data on social change in the United States is collected as part of the GSS.
+
+Source:  http://gss.norc.org/About-The-GSS  
+Source:  http://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/34802/version/1
+
+
+## Part 1: Data
+
+
+
+Data Collection Method: Previously, the data was collected only for english speaking and white Americans, but from last decade they have also included blacks and spanish speaking people in their survey. The survey is collected through computer-assisted personal interviews (CAPI), face-to-face interviews and telephone interviews.
+
+Generalizability and causality: Since the survey involves large size and with samples from almost all the regions of America, we can generalize the findings from this survey to all the population but we cannot make a causal claim because this is a observational study and not an controlled experiment. 
+
+Biases in the survey: We may have bias in the survey data collection. People volunteered the answers of the survey questionnaire so there may be the possibility that from certain regions responses were not collected as compared to other regions or certain type of people who haven't responded to the questionnaire well. When we look at the data we observe that there are many things that were not answered by the respondents.
+
+
+
+## Part 2: Research question
+
+I am intersted in finding out if there is a change in financial status of people who have completed highest level of education in high school, junior college, bachelor, graduate degree or less than high school. In other words, what is the relationship between the highest degree completed and the change in financial status? Is financial status independent of the highest degree people earn?
+
+This is an important research question as this will allow government and people to know about the role of education in improving the financial status of an individual. This can help government to decide on funding related to education and educational policies.
+
+The variables which will be used in the analysis are:
+
+        degree: A categorical variable stating respondents highest degree earned.
+        finalter: A categorical variable giving change in financial situation compared to past years.
+
+
+## Part 3: Exploratory data analysis
+
+To filter the rows which contains "NA" and exclude them from the data. The new data is saved in data frame edu. 
+
+```{r}
+gss%>%
+  filter(!is.na(finalter) & !is.na(degree) & year >= 2000)%>%
+  select(degree, finalter) -> edu
+dim(edu)
+str(edu)
+```
+
+```{r}
+  table(edu$degree, edu$finalter)
+  
+```
+
+
+This table summarizes all the data about the education level and change in financial position of people who have responded in survey after year 1999. I have excluded the use of survey data below year 2000 because the data collection method used were not satisfactory and the people surveyed were not a representative of the population due to the biases listed in part 1.
+
+
+
+```{r}
+ggplot(data = edu, aes(x = degree)) + geom_bar(aes(fill=finalter), position = "dodge")
+```
+
+
+This bar graph represents the counts in the summary table above. To better represent and visualize the data we make a mosaic plot.
+Observations from bar plot:  The counts for better financial status for the people who are graduate, bachelor and junior college is higher than for the people with high school and lower than high school education. 
+
+
+
+```{r}
+plot(table(edu$degree,edu$finalter), color = c(8,2,3), main = "Is there a change in financial status based on the highest degree earned")
+```
+
+The area of the worse financial situation is highest for LH High School and High School people and are lower for Junior College, Bachelor, and lowest for Graduate student. This shows that there is some association between level of education and change in financial status. But still we cannot prove this or make a statement that change of financial status and highest degree earned are dependent. To prove this we will do statistical inference. 
+
+
+
+## Part 4: Inference
+
+
+<b>Hypothesis Testing</b>
+
+<b>Null Hypothesis</b>: The change in the financial status of the respondent is independent of the highest level of degree respondent has earned. 
+
+<b>Alternative Hypothesis</b>: There is dependence between the change in the financial status of the respondent and the highest level of degree respondent has earned. 
+
+<b>Check Conditions</b>:
+
+1. Independence - The GSS dataset is generated from a random sample survey. We are fine assuming that the observations are independent of each other.
+
+2. Sample Size - The sample is obtained without replacement. Therefore we need to ensure that the smaple is less than 10% of U.S population, and 14,391 is indeed smaller than total U.S population. 
+
+3. Degrees of Freedom - The financial status have 3 levels ("Better", "Worse", "Stayed Same") and the educational status has 5 levels ("Lt High School", "High School", "Junior College", "Bachelor", "Graduate"). Since we have 2 categorical variables and that too with more than two levels, we will use Chi Square Test of Independence to test the hypothesis. 
+
+4. Expected Counts - To perform Cgi Square Test of Independence one of the condition is that the expected counts for each cell in the table should be atleast 5. 
+
+Checking the expected counts condition:
+
+```{r}
+chisq.test(edu$degree, edu$finalter)$expected
+```
+
+From this table we can easily see that no cells in this table has count less than 5. So, the expected count condition is fulfilled. Now we have fulfilled all the conditions to perform the Chi Square Test of Independence. 
+
+Also, here while comparing two categorical variables and doing chi-square test we dont require confidence intervals. Our interest was to perform hypothesis test to prove the association between the two categorical variables. 
+
+```{r}
+chisq.test(edu$degree, edu$finalter)
+```
+
+
+The chi-squared statistic is 294.39 and the p-value is very lower, almost zero, than the significance level of 0.05. Even if we consider 0.01 significance level the p-value is still lower than 0.01. Therefore we have strong evidence to reject the null hypothesis. Hence we have convincing evidence to state that " There is dependence between the change in the financial status of the respondent and the highest level of degree respondent has earned". 
+
+<b>
+Future Research: 
+</b>
+
+There is much more to do other than what I have done. What I did is studied the relation between two categorical varibale but we have 114 variables we can do a lot more. Also, for data collection there are lot of discripencies as respondents have not responded to many of the variables. 
+
